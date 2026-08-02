@@ -8,7 +8,7 @@ import "./tools/bash.js";
 import type { Message } from "./providers/types.js";
 
 async function main() {
-  const cfg = loadConfig();
+  const cfg = await loadConfig();
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
