@@ -12,8 +12,9 @@ export interface Config {
   provider: LLMProvider;
 }
 
-// Z.AI (Zhipu GLM) — OpenAI-compatible API endpoint.
-const ZAI_BASE_URL = "https://open.bigmodel.cn/api/paas/v4";
+// anyclaude proxy (lets us reuse a Claude Code subscription / GLM key via
+// the Anthropic API shape). Falls back to direct Z.AI if not running.
+const ANYCLAUDE_BASE_URL = process.env.ANTHROPIC_BASE_URL || "http://localhost:40767";
 
 function buildProvider(creds: SavedCreds): LLMProvider {
   switch (creds.provider) {
@@ -28,10 +29,13 @@ function buildProvider(creds: SavedCreds): LLMProvider {
         process.env.OPENAI_MODEL || "gpt-4o",
       );
     case "zai":
-      return new OpenAIProvider(
+      // Z.AI via anyclaude proxy (Anthropic shape). Model name keeps the
+      // zai/ prefix the proxy expects.
+      return new AnthropicProvider(
         creds.apiKey,
-        creds.model || "glm-4.6",
-        ZAI_BASE_URL,
+        creds.model || "zai/glm-5.2",
+        4096,
+        ANYCLAUDE_BASE_URL,
       );
   }
 }
@@ -39,7 +43,7 @@ function buildProvider(creds: SavedCreds): LLMProvider {
 function credsFromEnv(): SavedCreds | null {
   const which = (process.env.CODESPACE_PROVIDER || "").toLowerCase();
   if (which === "zai" && process.env.ZAI_API_KEY) {
-    return { provider: "zai", apiKey: process.env.ZAI_API_KEY, model: process.env.ZAI_MODEL || "glm-4.6" };
+    return { provider: "zai", apiKey: process.env.ZAI_API_KEY, model: process.env.ZAI_MODEL || "zai/glm-5.2" };
   }
   if (which === "openai" && process.env.OPENAI_API_KEY) {
     return { provider: "openai", apiKey: process.env.OPENAI_API_KEY };
@@ -49,7 +53,7 @@ function credsFromEnv(): SavedCreds | null {
   }
   // No CODESPACE_PROVIDER set but ZAI_API_KEY is in env — use it by default.
   if (process.env.ZAI_API_KEY) {
-    return { provider: "zai", apiKey: process.env.ZAI_API_KEY, model: "glm-4.6" };
+    return { provider: "zai", apiKey: process.env.ZAI_API_KEY, model: "zai/glm-5.2" };
   }
   return null;
 }

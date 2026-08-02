@@ -12,8 +12,8 @@ export class AnthropicProvider implements LLMProvider {
   private model: string;
   private maxTokens: number;
 
-  constructor(apiKey: string, model = "claude-sonnet-4-5", maxTokens = 4096) {
-    this.client = new Anthropic({ apiKey });
+  constructor(apiKey: string, model = "claude-sonnet-4-5", maxTokens = 4096, baseURL?: string) {
+    this.client = new Anthropic({ apiKey, ...(baseURL ? { baseURL } : {}) });
     this.model = model;
     this.maxTokens = maxTokens;
   }

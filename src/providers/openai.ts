@@ -37,6 +37,12 @@ export class OpenAIProvider implements LLMProvider {
       model: this.model,
       messages: mapped,
       tools: oaiTools,
+    }).catch((err: any) => {
+      // Surface the actual server message — OpenAI SDK often wraps it deep.
+      const status = err?.status ?? err?.response?.status;
+      const body = err?.error ?? err?.response?.body ?? err?.message;
+      const msg = typeof body === "string" ? body : JSON.stringify(body);
+      throw new Error(`${this.name} chat failed (HTTP ${status}): ${msg}`);
     });
     const choice = resp.choices[0];
     const msg = choice.message;
