@@ -6,6 +6,7 @@ import { runAgent } from "./agent.js";
 import { firstRunSetup, saveCreds, promptHidden, type SavedCreds } from "./ui/setup.js";
 import "./tools/files.js";
 import "./tools/bash.js";
+import "./tools/mkdir.js";
 import type { Message } from "./providers/types.js";
 
 async function main() {
