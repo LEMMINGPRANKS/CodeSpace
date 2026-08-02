@@ -27,7 +27,7 @@ export async function loadSavedCreds(): Promise<SavedCreds | null> {
   }
 }
 
-async function saveCreds(creds: SavedCreds): Promise<void> {
+export async function saveCreds(creds: SavedCreds): Promise<void> {
   await fs.mkdir(CONFIG_DIR, { recursive: true, mode: 0o700 });
   await fs.writeFile(CONFIG_PATH, JSON.stringify(creds, null, 2), { mode: 0o600 });
 }
@@ -48,7 +48,7 @@ function ask(rl: readline.Interface, prompt: string): Promise<string> {
   return new Promise(resolve => rl.question(prompt, ans => resolve(ans.trim())));
 }
 
-function askHidden(rl: readline.Interface, prompt: string): Promise<string> {
+export function askHidden(rl: readline.Interface, prompt: string): Promise<string> {
   // Temporarily mute output so the pasted key isn't echoed.
   const write = (rl as any)._writeToOutput.bind(rl);
   return new Promise<string>(resolve => {
@@ -62,6 +62,20 @@ function askHidden(rl: readline.Interface, prompt: string): Promise<string> {
       resolve(ans.trim());
     });
   });
+}
+
+// Standalone hidden prompt (creates its own readline). Used by /change.
+export async function promptHidden(prompt: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: process.stdin.isTTY || false,
+  });
+  try {
+    return await askHidden(rl, prompt);
+  } finally {
+    rl.close();
+  }
 }
 
 export async function firstRunSetup(): Promise<SavedCreds> {

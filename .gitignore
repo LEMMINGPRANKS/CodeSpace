@@ -3,3 +3,5 @@ node_modules/
 *.log
 .DS_Store
 dist/
+# CodeSpace generates demo files in cwd when testing itself — ignore root-level HTML.
+/*.html

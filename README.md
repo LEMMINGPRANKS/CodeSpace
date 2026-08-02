@@ -19,7 +19,8 @@ REPL to re-pick interactively.
 | command | what it does |
 |---|---|
 | `/help` | list commands |
-| `/setup` | re-run provider + API key picker |
+| `/change provider=<name>` | switch to `anthropic`, `openai`, or `zai` |
+| `/setup` | re-run full provider + key picker |
 | `/clear` | wipe conversation history |
 | `/provider` | show current provider |
 | `/exit` | quit |
