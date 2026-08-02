@@ -11,7 +11,18 @@ export ANTHROPIC_API_KEY=sk-...        # or OPENAI_API_KEY=...
 npm start                              # or: npx tsx src/index.ts
 ```
 
-Switch provider with `CODESPACE_PROVIDER=openai`.
+Switch provider with `CODESPACE_PROVIDER=openai`, or run `/setup` inside the
+REPL to re-pick interactively.
+
+### In-REPL commands
+
+| command | what it does |
+|---|---|
+| `/help` | list commands |
+| `/setup` | re-run provider + API key picker |
+| `/clear` | wipe conversation history |
+| `/provider` | show current provider |
+| `/exit` | quit |
 
 ## What it does
 

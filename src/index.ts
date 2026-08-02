@@ -1,14 +1,15 @@
 #!/usr/bin/env tsx
 // CodeSpace entry point — readline REPL wired to the agent loop.
 import * as readline from "node:readline";
-import { loadConfig } from "./config.js";
+import { loadConfig, buildProvider } from "./config.js";
 import { runAgent } from "./agent.js";
+import { firstRunSetup } from "./ui/setup.js";
 import "./tools/files.js";
 import "./tools/bash.js";
 import type { Message } from "./providers/types.js";
 
 async function main() {
-  const cfg = await loadConfig();
+  let cfg = await loadConfig();
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -19,13 +20,48 @@ async function main() {
   const cwd = process.cwd();
 
   console.log(`\x1b[1mCodeSpace\x1b[0m · provider=${cfg.provider.name} · cwd=${cwd}`);
-  console.log(`Type your request. Ctrl+D to exit.\n`);
+  console.log(`Type your request. /help for commands. Ctrl+D to exit.\n`);
   rl.prompt();
 
   rl.on("line", async (line) => {
     const text = line.trim();
     if (!text) { rl.prompt(); return; }
+
     if (text === "/exit" || text === "/quit") { rl.close(); return; }
+    if (text === "/help") {
+      console.log("  /help       — show this");
+      console.log("  /setup      — re-run provider + API key setup");
+      console.log("  /clear      — wipe conversation history");
+      console.log("  /provider   — show current provider");
+      console.log("  /exit       — quit");
+      rl.prompt();
+      return;
+    }
+    if (text === "/provider") {
+      console.log(`current provider: ${cfg.provider.name}`);
+      rl.prompt();
+      return;
+    }
+    if (text === "/clear") {
+      history.length = 0;
+      console.log("\x1b[2mhistory cleared\x1b[0m");
+      rl.prompt();
+      return;
+    }
+    if (text === "/setup") {
+      rl.pause();
+      try {
+        const creds = await firstRunSetup();
+        cfg = { provider: buildProvider(creds) };
+        console.log(`\x1b[32mprovider is now ${cfg.provider.name}\x1b[0m`);
+      } catch (err: any) {
+        console.error(`\x1b[31m${err?.message || String(err)}\x1b[0m`);
+      }
+      rl.resume();
+      rl.prompt();
+      return;
+    }
+
     rl.pause();
     try {
       await runAgent(history, text, {

@@ -16,7 +16,7 @@ export interface Config {
 // the Anthropic API shape). Falls back to direct Z.AI if not running.
 const ANYCLAUDE_BASE_URL = process.env.ANTHROPIC_BASE_URL || "http://localhost:40767";
 
-function buildProvider(creds: SavedCreds): LLMProvider {
+export function buildProvider(creds: SavedCreds): LLMProvider {
   switch (creds.provider) {
     case "anthropic":
       return new AnthropicProvider(
