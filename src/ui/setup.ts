@@ -8,7 +8,7 @@ import * as path from "node:path";
 import * as os from "node:os";
 
 export interface SavedCreds {
-  provider: "anthropic" | "openai";
+  provider: "anthropic" | "openai" | "zai";
   apiKey: string;
   model?: string;
 }
@@ -86,20 +86,34 @@ export async function firstRunSetup(): Promise<SavedCreds> {
     console.log("Which provider do you want to use?");
     console.log("  \x1b[1m1.\x1b[0m Anthropic (Claude)");
     console.log("  \x1b[1m2.\x1b[0m OpenAI (GPT)");
+    console.log("  \x1b[1m3.\x1b[0m Z.AI (GLM — needs ZAI_API_KEY in env)");
     console.log();
     const choice = await ask(rl, "\x1b[36mchoice [1]:\x1b[0m ");
-    const provider: "anthropic" | "openai" = choice === "2" ? "openai" : "anthropic";
+    const provider: SavedCreds["provider"] =
+      choice === "2" ? "openai" :
+      choice === "3" ? "zai" :
+      "anthropic";
 
-    console.log();
-    console.log(`Get your key from:`);
-    console.log(provider === "anthropic"
-      ? "  \x1b[2mhttps://console.anthropic.com/settings/keys\x1b[0m"
-      : "  \x1b[2mhttps://platform.openai.com/api-keys\x1b[0m");
-    console.log();
-    const apiKey = await askHidden(rl, "\x1b[36mPaste API key:\x1b[0m ");
-    if (!apiKey) {
-      console.error("\x1b[31mNo key entered. Bye.\x1b[0m");
-      process.exit(1);
+    let apiKey: string;
+    if (provider === "zai") {
+      apiKey = process.env.ZAI_API_KEY || "";
+      if (!apiKey) {
+        console.error("\x1b[31mZAI_API_KEY is not set in your env. Export it first.\x1b[0m");
+        process.exit(1);
+      }
+      console.log("\n\x1b[32m✓ using ZAI_API_KEY from env\x1b[0m");
+    } else {
+      console.log();
+      console.log(`Get your key from:`);
+      console.log(provider === "anthropic"
+        ? "  \x1b[2mhttps://console.anthropic.com/settings/keys\x1b[0m"
+        : "  \x1b[2mhttps://platform.openai.com/api-keys\x1b[0m");
+      console.log();
+      apiKey = await askHidden(rl, "\x1b[36mPaste API key:\x1b[0m ");
+      if (!apiKey) {
+        console.error("\x1b[31mNo key entered. Bye.\x1b[0m");
+        process.exit(1);
+      }
     }
 
     const creds: SavedCreds = { provider, apiKey };
