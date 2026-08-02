@@ -1,0 +1,25 @@
+{
+  "name": "codespace",
+  "version": "0.1.0",
+  "description": "Terminal coding agent — provider-agnostic, pure Node",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "bin": {
+    "codespace": "src/index.ts"
+  },
+  "license": "MIT",
+  "author": "Freddie",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
